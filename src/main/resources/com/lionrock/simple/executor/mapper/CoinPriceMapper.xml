@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.lionrock.simple.executor.mapper.CoinPriceMapper">
+	<resultMap id="coinPriceResultMap"
+		type="com.lionrock.simple.executor.model.CoinPrice">
+		<id property="id" column="id" />
+		<result property="localDateTime" column="local_date_time" />
+		<result property="code" column="code" />
+		<result property="price" column="price" />
+		<result property="updatedBy" column="updated_by" />
+	</resultMap>
+	<select id="getLatestCoinPriceByCode" resultMap="coinPriceResultMap">
+		SELECT * FROM COIN_PRICE
+		<where>
+			<if test="code != null and code!=''">
+				CODE = #{code, jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by local_date_time desc
+		fetch first 1 row only
+	</select>
+	<insert id="insertLatestCoinPrice" parameterType="com.lionrock.simple.executor.model.CoinPrice">
+		insert into coin_price(local_date_time,code,price,updated_by)
+		values(
+		#{coinPrice.localDateTime, jdbcType=TIMESTAMP},
+		#{coinPrice.code,
+		jdbcType=VARCHAR},
+		#{coinPrice.price, jdbcType=VARCHAR},
+		#{coinPrice.updatedBy,
+		jdbcType=VARCHAR});
+	</insert>
+</mapper>

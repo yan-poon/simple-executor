@@ -77,4 +77,27 @@ public class CoinPriceController {
 				Thread.currentThread().getId()));
 		return "Callable Task Started";
 	}
+
+	@PostMapping("/latest/invokeAll")
+	public String insertLatestCoinPriceInvokeAll() throws InterruptedException, ExecutionException {
+		System.out.println(String.format("%s Main Thread %s start the InvokeAll Task", LocalDateTime.now(),
+				Thread.currentThread().getId()));
+		ExecutorService executorService = Executors.newFixedThreadPool(4);
+		List<InsertCoinPriceCallableTask> tasks = new ArrayList<>();
+		for (String code : codes) {
+			tasks.add(new InsertCoinPriceCallableTask(code, this.coinPriceService));
+		}
+
+		List<Future<CoinPrice>> futurePrices = executorService.invokeAll(tasks);
+		for (Future<CoinPrice> futurePrice : futurePrices) {
+			CoinPrice coinPrice = futurePrice.get();
+			System.out.println(String.format("%s Main Thread %s got the coin price, coin: %s price:%s",
+					coinPrice.getLocalDateTime(), Thread.currentThread().getId(), coinPrice.getCode(),
+					coinPrice.getPrice()));
+		}
+		executorService.shutdown();
+		System.out.println(String.format("%s Main Thread %s completed the InvokeAll Task", LocalDateTime.now(),
+				Thread.currentThread().getId()));
+		return "InvokeAll Task Started";
+	}
 }

@@ -23,22 +23,24 @@ public class CoinPriceService {
 	}
 
 	@Transactional
-	public int insertLatestCoinPrice(String code) {
+	public CoinPrice insertLatestCoinPrice(String code) throws InterruptedException {
 		try {
-			System.out.println(LocalDateTime.now() + " Start insert price for " + code);
+			long threadId = Thread.currentThread().getId();
+			System.out.println(
+					String.format("%s Thread %s start insert price for %s", LocalDateTime.now(), threadId, code));
 			Thread.sleep((long) (Math.random() * 2000));
 			CoinPrice coinPrice = new CoinPrice();
 			coinPrice.setCode(code.toUpperCase());
 			coinPrice.setLocalDateTime(LocalDateTime.now());
 			coinPrice.setPrice(generateRandomPrice());
 			coinPrice.setUpdatedBy("Thread " + code.toUpperCase());
-			int affectedRow = coinPriceMapper.insertLatestCoinPrice(coinPrice);
-			System.out.println(LocalDateTime.now() + " Completed insert price for " + code);
-			return affectedRow;
+			coinPriceMapper.insertLatestCoinPrice(coinPrice);
+			System.out.println(
+					String.format("%s Thread %s completed insert price for %s", LocalDateTime.now(), threadId, code));
+			return coinPrice;
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return 0;
+			throw e;
 		}
 
 	}
